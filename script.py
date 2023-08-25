@@ -35,6 +35,12 @@ def on_intent_recognized(intent, slots):
         status = slots["server"]
         print("Changing server status to %s" % status)
         change_server_status(status)
+    elif intent == "turn_server_on":
+        print("Turning server on")
+        change_server_status("on")
+    elif intent == "turn_server_off":
+        print("Turning server off")
+        change_server_status("off")
     elif intent == "change_light_status":
         status = slots["light"]
         print("Changing light status to %s" % status)
