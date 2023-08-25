@@ -1,0 +1,4 @@
+pvrhino
+python-dotenv
+pvporcupine
+wakeonlan
