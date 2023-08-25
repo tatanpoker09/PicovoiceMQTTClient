@@ -19,17 +19,451 @@ rhino = None
 recorder = None
 
 
+import time
+
+import pvrhino as pvrhino
+from dotenv import load_dotenv
+
+load_dotenv()
+import os
+
+from datetime import datetime
+from threading import Thread
+
+import pvporcupine
+from pvrecorder import PvRecorder
+import wakeonlan
+
+MODELS_PATH = "porcupine_models" + os.sep + "linux" + os.sep
+KEYWORD_PATHS = [MODELS_PATH + "yo-journey.ppn", MODELS_PATH + "hey-journey.ppn"]
+rhino = None
+recorder = None
+
+
+def change_server_status(status):
+    if status == "on":
+        wakeonlan.send_magic_packet(os.getenv("SERVER_MAC_ADDRESS"))
+"script.py" 213L, 7156B                                                                                                                        1,1           Top
+
+root@DietPi:~/.ssh# cd ..
+root@DietPi:~# s
+-bash: s: command not found
+root@DietPi:~# ls
+''$'\001\320\005''@8@8'$'\t''@!'$'\006\004''@@@'$'\370\001\370\001\b\003\004''8'$'\002''8'$'\002''8'$'\002\034\034\001\001\005'   PicovoiceMQTTClient   upsnap
+Media																  immich-app
+root@DietPi:~# cd PicovoiceMQTTClient/
+root@DietPi:~/PicovoiceMQTTClient# python3 script.py
+PorcupineClient.show_audio_devices()
+devices = PvRecorder.get_available_devices()
+index = 0  # MacBook Air Microphone
+print(f'Using device: {devices[index]}')
+
+
+access_key = os.getenv('PICOVOICE_ACCESS_KEY')
+
+
+rhino = pvrhino.create(
+    access_key=access_key,
+    context_path='./models/SiliconRoom_en_raspberry-pi_v2_2_0.rhn'
+)
+
+PorcupineClient(
+    access_key=access_key,
+    library_path=None,
+    model_path=None,
+    keyword_paths=None,
+    sensitivities=[0.5],
+    output_path=None,
+    keywords=['picovoice'],
+    input_device_index=index).run()
+
+"script.py" 213L, 7165B                                                                                                                        198,56        98%
+context_path='./models/SiliconRoom_en_raspberry-pi_v2_2_0.rhn'
+index: 0, device name: Discard all samples (playback) or generate zero samples (capture)
+Using device: Discard all samples (playback) or generate zero samples (capture)
+
+
+access_key = os.getenv('PICOVOICE_ACCESS_KEY')
+
+
+rhino = pvrhino.create(
+    access_key=access_key,
+    context_path='./models/SiliconRoom_en_raspberry-pi_v2_2_0.rhn'
+)
+
+PorcupineClient(
+    access_key=access_key,
+    library_path=None,
+    model_path=None,
+    keyword_paths=None,
+    sensitivities=[0.5],
+    output_path=None,
+    keywords=['picovoice'],
+    input_device_index=index).run()
+
+
+if __name__ == '__main__':
+    # main()
+    change_server_status('on')
+"script.py" 214L, 7196B                                                                                                                        214,29        Bot
+keywords=['picovoice'],
+[ERROR] context file has incorrect format or belongs to a different platform
+[ERROR] failed to load context with 'INVALID_ARGUMENT'
+    Traceback (most recent call last):
+File "/root/PicovoiceMQTTClient/script.py", line 213, in <module>
+main()
+File "/root/PicovoiceMQTTClient/script.py", line 196, in main
+rhino = pvrhino.create(
+    File "/usr/local/lib/python3.9/dist-packages/pvrhino/_factory.py", line 55, in create
+return Rhino(
+    File "/usr/local/lib/python3.9/dist-packages/pvrhino/_rhino.py", line 189, in __init__
+PICOVOICE_ACCESS_KEY=OCINvPkTfEd5nZtoTLjN1eT8mOH/DoMr12uaCu/r9qDm6EuREAkHrg==
+                     SERVER_MAC_ADDRESS=74:56:3c:6f:79:11
+SERVER_IP_ADDRESS=192.168.50.104
+SSH_KEY_PATH=/home/pi/.ssh/id_rsa
+SSH_USER=tatan
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+".env" 5L, 197B                                                                                                                                5,14          All
+raise self._PICOVOICE_STATUS_TO_EXCEPTION[status]()
+pvrhino._rhino.RhinoInvalidArgumentError
+root@DietPi:~/PicovoiceMQTTClient# vim script.py
+root@DietPi:~/PicovoiceMQTTClient# python3 script.py
+index: 0, device name: Discard all samples (playback) or generate zero samples (capture)
+PICOVOICE_ACCESS_KEY=OCINvPkTfEd5nZtoTLjN1eT8mOH/DoMr12uaCu/r9qDm6EuREAkHrg==
+SERVER_MAC_ADDRESS=74:56:3c:6f:79:11
+SERVER_IP_ADDRESS=192.168.50.104
+SSH_KEY_PATH=/home/pi/.ssh/id_rsa
+SSH_USER=tatan
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+".env" 5L, 197B                                                                                                                                5,14          All
+Using device: Discard all samples (playback) or generate zero samples (capture)
+Using device: Discard all samples (playback) or generate zero samples (capture)
+Listening {
+    picovoice (0.50)
+}
+^CStopping ...
+root@DietPi:~/PicovoiceMQTTClient# vim script.py
+root@DietPi:~/PicovoiceMQTTClient# python3 script.py
+root@DietPi:~/PicovoiceMQTTClient# vim script.py
+root@DietPi:~/PicovoiceMQTTClient# python3 script.py
+Warning: Identity file $/home/pi/.ssh/id_rsa not accessible: No such file or directory.
+usage: ssh [-46AaCfGgKkMNnqsTtVvXxYy] [-B bind_interface]
+[-b bind_address] [-c cipher_spec] [-D [bind_address:]port]
+[-E log_file] [-e escape_char] [-F configfile] [-I pkcs11]
+[-i identity_file] [-J [user@]host[:port]] [-L address]
+PICOVOICE_ACCESS_KEY=OCINvPkTfEd5nZtoTLjN1eT8mOH/DoMr12uaCu/r9qDm6EuREAkHrg==
+SERVER_MAC_ADDRESS=74:56:3c:6f:79:11
+SERVER_IP_ADDRESS=192.168.50.104
+SSH_KEY_PATH=/home/pi/.ssh/id_rsa
+SSH_USER=tatan
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+".env" 5L, 197B                                                                                                                                5,14          All
+PICOVOICE_ACCESS_KEY=OCINvPkTfEd5nZtoTLjN1eT8mOH/DoMr12uaCu/r9qDm6EuREAkHrg==
+[-l login_name] [-m mac_spec] [-O ctl_cmd] [-o option] [-p port]
+[-Q query_option] [-R address] [-S ctl_path] [-W host:port]
+[-w local_tun[:remote_tun]] destination [command]
+root@DietPi:~/PicovoiceMQTTClient# vim .env
+root@DietPi:~/PicovoiceMQTTClient# ls
+README.md  models  requirements.txt  script.py
+root@DietPi:~/PicovoiceMQTTClient# pwd
+/root/PicovoiceMQTTClient
+root@DietPi:~/PicovoiceMQTTClient# vim .env
+root@DietPi:~/PicovoiceMQTTClient# cd
+
+
+access_key = os.getenv('PICOVOICE_ACCESS_KEY')
+
+
+rhino = pvrhino.create(
+    access_key=access_key,
+    context_path='./models/SiliconRoom_en_raspberry-pi_v2_2_0.rhn'
+)
+
+PorcupineClient(
+    access_key=access_key,
+    library_path=None,
+    model_path=None,
+    keyword_paths=None,
+    sensitivities=[0.5],
+    output_path=None,
+    keywords=['picovoice'],
+    input_device_index=index).run()
+
+
+if __name__ == '__main__':
+    # main()
+    change_server_status('off')
+"script.py" 214L, 7197B                                                                                                                        214,28        Bot
+print(f"If all other arguments seem valid, ensure that '{self._access_key}' is a valid AccessKey")
+root@DietPi:~# ls
+''$'\001\320\005''@8@8'$'\t''@!'$'\006\004''@@@'$'\370\001\370\001\b\003\004''8'$'\002''8'$'\002''8'$'\002\034\034\001\001\005'   PicovoiceMQTTClient   upsnap
+Media																  immich-app
+root@DietPi:~# pwd
+/root
+root@DietPi:~# cd .ssh
+root@DietPi:~/.ssh# ls
+id_rsa	id_rsa.pub  known_hosts
+root@DietPi:~/.ssh# cd ..
+root@DietPi:~# ls
+''$'\001\320\005''@8@8'$'\t''@!'$'\006\004''@@@'$'\370\001\370\001\b\003\004''8'$'\002''8'$'\002''8'$'\002\034\034\001\001\005'   PicovoiceMQTTClient   upsnap
+Media																  immich-app
+root@DietPi:~# cd PicovoiceMQTTClient/
+root@DietPi:~/PicovoiceMQTTClient# vim .env
+root@DietPi:~/PicovoiceMQTTClient# python3 script.py
+Warning: Identity file $/root/.ssh/id_rsa not accessible: No such file or directory.
+usage: ssh [-46AaCfGgKkMNnqsTtVvXxYy] [-B bind_interface]
+[-b bind_address] [-c cipher_spec] [-D [bind_address:]port]
+[-E log_file] [-e escape_char] [-F configfile] [-I pkcs11]
+[-i identity_file] [-J [user@]host[:port]] [-L address]
+[-l login_name] [-m mac_spec] [-O ctl_cmd] [-o option] [-p port]
+[-Q query_option] [-R address] [-S ctl_path] [-W host:port]
+[-w local_tun[:remote_tun]] destination [command]
+raise e
+except pvporcupine.PorcupineActivationRefusedError as e:
+print(f"AccessKey '{self._access_key}' refused")
+raise e
+except pvporcupine.PorcupineActivationThrottledError as e:
+print(f"AccessKey '{self._access_key}' has been throttled")
+raise e
+except pvporcupine.PorcupineError as e:
+print(f"Failed to initialize Porcupine")
+raise e
+except KeyboardInterrupt:
+print('Stopping ...')
+finally:
+if porcupine is not None:
+    porcupine.delete()
+
+if recorder is not None:
+    recorder.delete()
+
+if wav_file is not None:
+    wav_file.close()
+
+@classmethod
+def show_audio_devices(cls):
+"script.py" 214L, 7194B                                                                                                                        166,33        81%
+root@DietPi:~/PicovoiceMQTTClient# vim script.py
+PICOVOICE_ACCESS_KEY=OCINvPkTfEd5nZtoTLjN1eT8mOH/DoMr12uaCu/r9qDm6EuREAkHrg==
+SERVER_MAC_ADDRESS=74:56:3c:6f:79:11
+SERVER_IP_ADDRESS=192.168.50.104
+SSH_KEY_PATH=/root/.ssh/id_rsa
+SSH_USER=tatan
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+".env" 5L, 194B                                                                                                                                4,18          All
+PICOVOICE_ACCESS_KEY=OCINvPkTfEd5nZtoTLjN1eT8mOH/DoMr12uaCu/r9qDm6EuREAkHrg==
+root@DietPi:~/PicovoiceMQTTClient# python3 script.py
+None@192.168.50.104: Permission denied (publickey).
+root@DietPi:~/PicovoiceMQTTClient# ls
+PICOVOICE_ACCESS_KEY=OCINvPkTfEd5nZtoTLjN1eT8mOH/DoMr12uaCu/r9qDm6EuREAkHrg==
+SERVER_MAC_ADDRESS=74:56:3c:6f:79:11
+SERVER_IP_ADDRESS=192.168.50.104
+SSH_KEY_PATH=./siliconserver
+SSH_USER=tatan
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+".env" 5L, 192B                                                                                                                                4,28          All
+PICOVOICE_ACCESS_KEY=OCINvPkTfEd5nZtoTLjN1eT8mOH/DoMr12uaCu/r9qDm6EuREAkHrg==
+README.md  models  requirements.txt  script.py
+import pvrhino as pvrhino
+from dotenv import load_dotenv
+
+load_dotenv()
+import os
+
+from datetime import datetime
+from threading import Thread
+
+import pvporcupine
+from pvrecorder import PvRecorder
+import wakeonlan
+
+MODELS_PATH = "porcupine_models" + os.sep + "linux" + os.sep
+KEYWORD_PATHS = [MODELS_PATH + "yo-journey.ppn", MODELS_PATH + "hey-journey.ppn"]
+rhino = None
+recorder = None
+
+
 def change_server_status(status):
     if status == "on":
         wakeonlan.send_magic_packet(os.getenv("SERVER_MAC_ADDRESS"))
     elif status == "off":
         ssh_key_path = os.getenv("SSH_KEY_PATH")
-        server_username = os.getenv("SERVER_USERNAME")
+"script.py" 214L, 7194B                                                                                                                        21,0-1         1%
+def change_server_status(status):
+    root@DietPi:~/PicovoiceMQTTClient# cd ..
+PICOVOICE_ACCESS_KEY=OCINvPkTfEd5nZtoTLjN1eT8mOH/DoMr12uaCu/r9qDm6EuREAkHrg==
+SERVER_MAC_ADDRESS=74:56:3c:6f:79:11
+SERVER_IP_ADDRESS=192.168.50.104
+SSH_KEY_PATH=./siliconserver
+SSH_USER=tatan
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+import time
+
+import pvrhino as pvrhino
+from dotenv import load_dotenv
+
+load_dotenv()
+import os
+
+from datetime import datetime
+from threading import Thread
+
+import pvporcupine
+from pvrecorder import PvRecorder
+import wakeonlan
+
+MODELS_PATH = "porcupine_models" + os.sep + "linux" + os.sep
+KEYWORD_PATHS = [MODELS_PATH + "yo-journey.ppn", MODELS_PATH + "hey-journey.ppn"]
+rhino = None
+recorder = None
+
+
+def change_server_status(status):
+    if status == "on":
+        wakeonlan.send_magic_packet(os.getenv("SERVER_MAC_ADDRESS"))
+    elif status == "off":
+        ssh_key_path = os.getenv("SSH_KEY_PATH")
+        server_username = os.getenv("SSH_USER")
         server_ip_address = os.getenv("SERVER_IP_ADDRESS")
-        os.system(f"ssh -i ${ssh_key_path} -o StrictHostKeyChecking=no ${server_username}@${server_ip_address} "
+        os.system(f"ssh -i {ssh_key_path} -o StrictHostKeyChecking=no {server_username}@{server_ip_address} "
                   f"'sudo -S poweroff'")
 
 
+def on_intent_recognized(intent, slots):
+    if intent == "change_server_status":
+        status = slots["server"]
+        print("Changing server status to %s" % status)
+        change_server_status(status)
+"script.py" 214L, 7187B                                                                                                                               27,45         Top
+import time
+
+import pvrhino as pvrhino
+from dotenv import load_dotenv
+
+load_dotenv()
+import os
+
+from datetime import datetime
+from threading import Thread
+
+import pvporcupine
+from pvrecorder import PvRecorder
+import wakeonlan
+
+MODELS_PATH = "porcupine_models" + os.sep + "linux" + os.sep
+KEYWORD_PATHS = [MODELS_PATH + "yo-journey.ppn", MODELS_PATH + "hey-journey.ppn"]
+rhino = None
+recorder = None
+
+
+def change_server_status(status):
+    if status == "on":
+        wakeonlan.send_magic_packet(os.getenv("SERVER_MAC_ADDRESS"))
+    elif status == "off":
+        ssh_key_path = os.getenv("SSH_KEY_PATH")
+        server_username = os.getenv("SSH_USER")
+        server_ip_address = os.getenv("SERVER_IP_ADDRESS")
+        os.system(f"ssh -i {ssh_key_path} -o StrictHostKeyChecking=no {server_username}@{server_ip_address} "
+                  f"'sudo -S poweroff'")
 def on_intent_recognized(intent, slots):
     if intent == "change_server_status":
         status = slots["server"]
