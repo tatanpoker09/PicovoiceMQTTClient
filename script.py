@@ -1,23 +1,77 @@
 import time
 
+import pvrhino as pvrhino
 from dotenv import load_dotenv
 
 load_dotenv()
 import os
-import struct
-import wave
+
 from datetime import datetime
 from threading import Thread
 
 import pvporcupine
 from pvrecorder import PvRecorder
+import wakeonlan
 
 MODELS_PATH = "porcupine_models" + os.sep + "linux" + os.sep
 KEYWORD_PATHS = [MODELS_PATH + "yo-journey.ppn", MODELS_PATH + "hey-journey.ppn"]
+rhino = None
+recorder = None
+
+
+def change_server_status(status):
+    if status == "on":
+        wakeonlan.send_magic_packet(os.getenv("SERVER_MAC_ADDRESS"))
+    elif status == "off":
+        ssh_key_path = os.getenv("SSH_KEY_PATH")
+        server_username = os.getenv("SERVER_USERNAME")
+        server_ip_address = os.getenv("SERVER_IP_ADDRESS")
+        os.system(f"ssh -i ${ssh_key_path} -o StrictHostKeyChecking=no ${server_username}@${server_ip_address} "
+                  f"'sudo -S poweroff'")
+
+
+def on_intent_recognized(intent, slots):
+    if intent == "change_server_status":
+        status = slots["server"]
+        print("Changing server status to %s" % status)
+        change_server_status(status)
+    elif intent == "change_light_status":
+        status = slots["light"]
+        print("Changing light status to %s" % status)
+    elif intent == "ask_weather":
+        print("Weather is sunny")
+    elif intent == "ask_time":
+        print("Current time is %s" % str(datetime.now()))
+
+def on_wake_word_detected(wakeword):
+    global rhino
+    global recorder
+    print('[%s] Detected %s' % (str(datetime.now()), wakeword))
+    try:
+        while True:
+            pcm = recorder.read()
+            is_finalized = rhino.process(pcm)
+            if is_finalized:
+                inference = rhino.get_inference()
+                if inference.is_understood:
+                    on_intent_recognized(inference.intent, inference.slots)
+                    print('{')
+                    print("  intent : '%s'" % inference.intent)
+                    print('  slots : {')
+                    for slot, value in inference.slots.items():
+                        print("    %s : '%s'" % (slot, value))
+                    print('  }')
+                    print('}\n')
+                else:
+                    print("Didn't understand the command.\n")
+                break
+    except KeyboardInterrupt:
+        print('Stopping ...')
+    finally:
+        recorder.stop()
 
 
 class PorcupineClient(Thread):
-
     def __init__(
             self,
             access_key,
@@ -30,7 +84,7 @@ class PorcupineClient(Thread):
             keywords=None,
             sleep_delta=0.5):
 
-        super(PorcupineClient   , self).__init__()
+        super(PorcupineClient, self).__init__()
 
         self._access_key = access_key
         self._library_path = library_path
@@ -53,9 +107,8 @@ class PorcupineClient(Thread):
         #         keywords.append(' '.join(keyword_phrase_part[0:-6]))
         #     else:
         #         keywords.append(keyword_phrase_part[0])
-
+        global recorder
         porcupine = None
-        recorder = None
         wav_file = None
         try:
             porcupine = pvporcupine.create(
@@ -66,28 +119,20 @@ class PorcupineClient(Thread):
             recorder = PvRecorder(device_index=self._input_device_index, frame_length=porcupine.frame_length)
             recorder.start()
 
-            if self._output_path is not None:
-                wav_file = wave.open(self._output_path, "w")
-                wav_file.setparams((1, 2, 16000, 512, "NONE", "NONE"))
-
             print(f'Using device: {recorder.selected_device}')
-
             print('Listening {')
             for keyword, sensitivity in zip(self.keywords, self._sensitivities):
                 print('  %s (%.2f)' % (keyword, sensitivity))
             print('}')
+
             sleep_delta = 0
             while True:
                 pcm = recorder.read()
 
-                if wav_file is not None:
-                    wav_file.writeframes(struct.pack("h" * len(pcm), *pcm))
-
                 result = porcupine.process(pcm)
                 if sleep_delta == 0:
                     if result >= 0:
-                        print('[%s] Detected %s' % (str(datetime.now()), self.keywords[result]))
-                        recorder.stop()
+                        on_wake_word_detected(self.keywords[result])
                         recorder.start()
                         sleep_delta = self.sleep_delta
                 else:
@@ -132,12 +177,21 @@ class PorcupineClient(Thread):
 
 
 def main():
+    global rhino
     PorcupineClient.show_audio_devices()
     devices = PvRecorder.get_available_devices()
     index = 0  # MacBook Air Microphone
     print(f'Using device: {devices[index]}')
 
+
     access_key = os.getenv('PICOVOICE_ACCESS_KEY')
+
+
+    rhino = pvrhino.create(
+        access_key=access_key,
+        context_path='./models/SiliconRoom_en_mac_v2_2_0.rhn'
+    )
+
     PorcupineClient(
         access_key=access_key,
         library_path=None,
