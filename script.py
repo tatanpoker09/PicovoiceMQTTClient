@@ -15,8 +15,6 @@ import pvporcupine
 from pvrecorder import PvRecorder
 import wakeonlan
 
-MODELS_PATH = "porcupine_models" + os.sep + "linux" + os.sep
-KEYWORD_PATHS = [MODELS_PATH + "yo-journey.ppn", MODELS_PATH + "hey-journey.ppn"]
 rhino = None
 recorder = None
 
@@ -35,21 +33,21 @@ def change_server_status(status):
 def on_intent_recognized(intent, slots):
     if intent == "change_server_status":
         status = slots["server"]
-        speak(intent, "Changing server status to %s" % status)
+        speak(intent+status, "Changing server status to %s" % status)
         change_server_status(status)
     elif intent == "turn_server_on":
-        speak(intent, "Turning server on")
+        speak("change_server_statuson", "Changing server status to on")
         change_server_status("on")
     elif intent == "turn_server_off":
-        speak(intent, "Turning server off")
+        speak("change_server_statusoff", "Changing server status to off")
         change_server_status("off")
     elif intent == "change_light_status":
         status = slots["light"]
-        speak(intent, "Changing light status to %s" % status)
+        speak(intent+status, "Changing light status to %s" % status)
     elif intent == "ask_weather":
         speak(intent, "Weather is sunny")
     elif intent == "ask_time":
-        speak(intent, "Current time is %s" % str(datetime.now()))
+        speak(intent, "Current time is %s" % str(datetime.now()), cache=False)
 
 
 def on_wake_word_detected(wakeword):
@@ -194,9 +192,10 @@ def main():
 
     access_key = os.getenv('PICOVOICE_ACCESS_KEY')
 
+    MODEL_NAME=os.getenv("MODEL_NAME")
     rhino = pvrhino.create(
         access_key=access_key,
-        context_path='./models/SiliconRoom_en_mac_v2_2_0.rhn'
+        context_path=f'./models/{MODEL_NAME}'
     )
 
     PorcupineClient(
