@@ -3,3 +3,4 @@ python-dotenv
 pvporcupine
 wakeonlan
 pvrecorder
+gTTS
