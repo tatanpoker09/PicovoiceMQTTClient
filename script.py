@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from texttospeech import speak
 
 load_dotenv()
+
 import os
 
 from datetime import datetime
@@ -50,6 +51,7 @@ def on_intent_recognized(intent, slots):
         speak(intent, "Current time is %s" % str(datetime.now()), cache=False)
 
 
+
 def on_wake_word_detected(wakeword):
     global rhino
     global recorder
@@ -70,7 +72,7 @@ def on_wake_word_detected(wakeword):
                     print('  }')
                     print('}\n')
                 else:
-                    print("Didn't understand the command.\n")
+                    speak(None, "Didn't understand the command.")
                 break
     except KeyboardInterrupt:
         print('Stopping ...')
