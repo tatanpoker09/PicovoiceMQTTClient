@@ -123,6 +123,7 @@ class PorcupineClient(Thread):
             porcupine = pvporcupine.create(
                 access_key=self._access_key,
                 keywords=self.keywords,
+                model_path=self._model_path,
                 sensitivities=self._sensitivities)
 
             recorder = PvRecorder(device_index=self._input_device_index, frame_length=porcupine.frame_length)
@@ -204,10 +205,10 @@ def main():
         access_key=access_key,
         library_path=None,
         model_path=None,
-        keyword_paths=None,
+        keyword_paths='./models/Jarvis_en_raspberry-pi_v2_2_0.ppn',
         sensitivities=[0.5],
         output_path=None,
-        keywords=['picovoice'],
+        keywords=['Jarvis'],
         input_device_index=index).run()
 
 
