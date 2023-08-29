@@ -210,15 +210,14 @@ def main():
         access_key=access_key,
         context_path=f'./models/{MODEL_NAME}'
     )
-
     PorcupineClient(
         access_key=access_key,
         library_path=None,
         model_path=None,
-        keyword_paths='./models/Jarvis_en_raspberry-pi_v2_2_0.ppn',
+        keyword_paths=None,
         sensitivities=[0.5],
         output_path=None,
-        keywords=['Jarvis'],
+        keywords=['jarvis'],
         input_device_index=index).run()
 
 
