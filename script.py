@@ -190,7 +190,17 @@ def main():
     global rhino
     PorcupineClient.show_audio_devices()
     devices = PvRecorder.get_available_devices()
-    index = 0  # MacBook Air Microphone
+    microphone_name = os.getenv('PV_MICROPHONE')
+    if microphone_name is not None:
+        index = None
+        for i in range(len(devices)):
+            if microphone_name in devices[i]:
+                index = i
+                break
+        if index is None:
+            raise ValueError("Couldn't find audio device with name '%s'" % microphone_name)
+    else:
+        index = 0
     print(f'Using device: {devices[index]}')
 
     access_key = os.getenv('PICOVOICE_ACCESS_KEY')
