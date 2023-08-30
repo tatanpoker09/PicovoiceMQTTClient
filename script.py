@@ -11,13 +11,9 @@ import os
 
 from datetime import datetime
 from threading import Thread
-
 import pvporcupine
 from pvrecorder import PvRecorder
 import wakeonlan
-
-rhino = None
-recorder = None
 
 
 def change_server_status(status):
@@ -34,7 +30,7 @@ def change_server_status(status):
 def on_intent_recognized(intent, slots):
     if intent == "change_server_status":
         status = slots["server"]
-        speak(intent+status, "Changing server status to %s" % status)
+        speak(intent + status, "Changing server status to %s" % status)
         change_server_status(status)
     elif intent == "turn_server_on":
         speak("change_server_statuson", "Changing server status to on")
@@ -44,17 +40,14 @@ def on_intent_recognized(intent, slots):
         change_server_status("off")
     elif intent == "change_light_status":
         status = slots["light"]
-        speak(intent+status, "Changing light status to %s" % status)
+        speak(intent + status, "Changing light status to %s" % status)
     elif intent == "ask_weather":
         speak(intent, "Weather is sunny")
     elif intent == "ask_time":
         speak(intent, "Current time is %s" % str(datetime.now()), cache=False)
 
 
-
 def on_wake_word_detected(wakeword):
-    global rhino
-    global recorder
     print('[%s] Detected %s' % (str(datetime.now()), wakeword))
     try:
         while True:
@@ -81,69 +74,48 @@ def on_wake_word_detected(wakeword):
 
 
 class PorcupineClient(Thread):
+
     def __init__(
             self,
             access_key,
-            library_path,
-            model_path,
-            keyword_paths,
             sensitivities,
-            input_device_index=None,
-            output_path=None,
             keywords=None,
             sleep_delta=0.5):
 
         super(PorcupineClient, self).__init__()
-
-        self._access_key = access_key
-        self._library_path = library_path
-        self._model_path = model_path
-        self._keyword_paths = keyword_paths
-        self._sensitivities = sensitivities
-        self._input_device_index = input_device_index
-        self.sleep_delta = sleep_delta
-        self._output_path = output_path
+        self.recorder = None
         self.keywords = keywords
+        self.sleep_delta = sleep_delta
+
+        self.porcupine = pvporcupine.create(
+            access_key=access_key,
+            keywords=keywords,
+            sensitivities=sensitivities)
+
+    def create_recoder(self, device_index):
+        self.recorder = PvRecorder(device_index=device_index, frame_length=self.porcupine.frame_length)
+
+        print(f'Created Recorder. Using device: {self.recorder.selected_device}')
+        print('Listening {')
+        for keyword, sensitivity in zip(self.keywords, self.sensitivities):
+            print('  %s (%.2f)' % (keyword, sensitivity))
+        print('}')
 
     def run(self):
         """
          Creates an input audio stream, instantiates an instance of Porcupine object, and monitors the audio stream for
          occurrences of the wake word(s). It prints the time of detection for each occurrence and the wake word.
          """
-        # for x in self._keyword_paths:
-        #     keyword_phrase_part = os.path.basename(x).replace('.ppn', '').split('_')
-        #     if len(keyword_phrase_part) > 6:
-        #         keywords.append(' '.join(keyword_phrase_part[0:-6]))
-        #     else:
-        #         keywords.append(keyword_phrase_part[0])
-        global recorder
-        porcupine = None
-        wav_file = None
         try:
-            porcupine = pvporcupine.create(
-                access_key=self._access_key,
-                keywords=self.keywords,
-                model_path=self._model_path,
-                sensitivities=self._sensitivities)
-
-            recorder = PvRecorder(device_index=self._input_device_index, frame_length=porcupine.frame_length)
-            recorder.start()
-
-            print(f'Using device: {recorder.selected_device}')
-            print('Listening {')
-            for keyword, sensitivity in zip(self.keywords, self._sensitivities):
-                print('  %s (%.2f)' % (keyword, sensitivity))
-            print('}')
-
             sleep_delta = 0
             while True:
-                pcm = recorder.read()
+                pcm = self.recorder.read()
 
-                result = porcupine.process(pcm)
+                result = self.porcupine.process(pcm)
                 if sleep_delta == 0:
                     if result >= 0:
                         on_wake_word_detected(self.keywords[result])
-                        recorder.start()
+                        self.recorder.start()
                         sleep_delta = self.sleep_delta
                 else:
                     sleep_delta = max(sleep_delta - time.time(), 0)
@@ -169,14 +141,11 @@ class PorcupineClient(Thread):
         except KeyboardInterrupt:
             print('Stopping ...')
         finally:
-            if porcupine is not None:
-                porcupine.delete()
+            if self.porcupine is not None:
+                self.porcupine.delete()
 
             if recorder is not None:
                 recorder.delete()
-
-            if wav_file is not None:
-                wav_file.close()
 
     @classmethod
     def show_audio_devices(cls):
@@ -186,11 +155,8 @@ class PorcupineClient(Thread):
             print(f'index: {i}, device name: {devices[i]}')
 
 
-def main():
-    global rhino
-    PorcupineClient.show_audio_devices()
-    devices = PvRecorder.get_available_devices()
-    microphone_name = os.getenv('PV_MICROPHONE')
+def get_microphone_index_by_name(microphone_name, devices):
+    index = 0
     if microphone_name is not None:
         index = None
         for i in range(len(devices)):
@@ -199,26 +165,31 @@ def main():
                 break
         if index is None:
             raise ValueError("Couldn't find audio device with name '%s'" % microphone_name)
-    else:
-        index = 0
+    return index
+
+
+def main():
+    PorcupineClient.show_audio_devices()
+
+    devices = PvRecorder.get_available_devices()
+    microphone_name = os.getenv('PV_MICROPHONE')
+
+    index = get_microphone_index_by_name(microphone_name, devices)
     print(f'Using device: {devices[index]}')
 
     access_key = os.getenv('PICOVOICE_ACCESS_KEY')
 
-    MODEL_NAME=os.getenv("MODEL_NAME")
+    porcupine_client = PorcupineClient(
+        access_key=access_key,
+        sensitivities=[0.5],
+        keywords=['jarvis'])
+
+    recorder.start()
+
     rhino = pvrhino.create(
         access_key=access_key,
         context_path=f'./models/{MODEL_NAME}'
     )
-    PorcupineClient(
-        access_key=access_key,
-        library_path=None,
-        model_path=None,
-        keyword_paths=None,
-        sensitivities=[0.5],
-        output_path=None,
-        keywords=['jarvis'],
-        input_device_index=index).run()
 
 
 if __name__ == '__main__':
