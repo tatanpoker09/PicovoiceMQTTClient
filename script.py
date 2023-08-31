@@ -5,8 +5,6 @@ from dotenv import load_dotenv
 
 from texttospeech import speak
 
-load_dotenv()
-
 import os
 
 from datetime import datetime
@@ -14,6 +12,8 @@ from threading import Thread
 import pvporcupine
 from pvrecorder import PvRecorder
 import wakeonlan
+
+load_dotenv()
 
 
 def change_server_status(status):
@@ -47,45 +47,23 @@ def on_intent_recognized(intent, slots):
         speak(intent, "Current time is %s" % str(datetime.now()), cache=False)
 
 
-def on_wake_word_detected(wakeword):
-    print('[%s] Detected %s' % (str(datetime.now()), wakeword))
-    try:
-        while True:
-            pcm = recorder.read()
-            is_finalized = rhino.process(pcm)
-            if is_finalized:
-                inference = rhino.get_inference()
-                if inference.is_understood:
-                    on_intent_recognized(inference.intent, inference.slots)
-                    print('{')
-                    print("  intent : '%s'" % inference.intent)
-                    print('  slots : {')
-                    for slot, value in inference.slots.items():
-                        print("    %s : '%s'" % (slot, value))
-                    print('  }')
-                    print('}\n')
-                else:
-                    speak(None, "Didn't understand the command.")
-                break
-    except KeyboardInterrupt:
-        print('Stopping ...')
-    finally:
-        recorder.stop()
-
-
 class PorcupineClient(Thread):
 
     def __init__(
             self,
             access_key,
             sensitivities,
+            rhino_client,
             keywords=None,
             sleep_delta=0.5):
 
         super(PorcupineClient, self).__init__()
+        self._access_key = "SECRET"
         self.recorder = None
         self.keywords = keywords
         self.sleep_delta = sleep_delta
+        self.rhino_client = rhino_client
+        self.sensitivities = sensitivities
 
         self.porcupine = pvporcupine.create(
             access_key=access_key,
@@ -114,8 +92,7 @@ class PorcupineClient(Thread):
                 result = self.porcupine.process(pcm)
                 if sleep_delta == 0:
                     if result >= 0:
-                        on_wake_word_detected(self.keywords[result])
-                        self.recorder.start()
+                        self.rhino_client.on_wake_word_detected(self.keywords[result])
                         sleep_delta = self.sleep_delta
                 else:
                     sleep_delta = max(sleep_delta - time.time(), 0)
@@ -144,8 +121,8 @@ class PorcupineClient(Thread):
             if self.porcupine is not None:
                 self.porcupine.delete()
 
-            if recorder is not None:
-                recorder.delete()
+            if self.recorder is not None:
+                self.recorder.delete()
 
     @classmethod
     def show_audio_devices(cls):
@@ -153,6 +130,39 @@ class PorcupineClient(Thread):
 
         for i in range(len(devices)):
             print(f'index: {i}, device name: {devices[i]}')
+
+    def start_recorder(self):
+        self.recorder.start()
+
+
+class RhinoClient():
+    def __init__(self, recorder):
+        self.recorder = recorder
+
+    def on_wake_word_detected(self, wakeword):
+        print('[%s] Detected %s' % (str(datetime.now()), wakeword))
+        try:
+            while True:
+                pcm = self.recorder.read()
+                is_finalized = self.rhino.process(pcm)
+                if is_finalized:
+                    inference = self.rhino.get_inference()
+                    if inference.is_understood:
+                        on_intent_recognized(inference.intent, inference.slots)
+                        print('{')
+                        print("  intent : '%s'" % inference.intent)
+                        print('  slots : {')
+                        for slot, value in inference.slots.items():
+                            print("    %s : '%s'" % (slot, value))
+                        print('  }')
+                        print('}\n')
+                    else:
+                        speak(None, "Didn't understand the command.")
+                    break
+        except KeyboardInterrupt:
+            print('Stopping ...')
+        finally:
+            self.recorder.stop()
 
 
 def get_microphone_index_by_name(microphone_name, devices):
@@ -179,17 +189,20 @@ def main():
 
     access_key = os.getenv('PICOVOICE_ACCESS_KEY')
 
-    porcupine_client = PorcupineClient(
-        access_key=access_key,
-        sensitivities=[0.5],
-        keywords=['jarvis'])
-
-    recorder.start()
+    MODEL_NAME = os.getenv('RHINO_MODEL_NAME')
 
     rhino = pvrhino.create(
         access_key=access_key,
         context_path=f'./models/{MODEL_NAME}'
     )
+
+    porcupine_client = PorcupineClient(
+        access_key=access_key,
+        sensitivities=[0.5],
+        keywords=['jarvis'],
+        rhino_client=rhino
+    )
+    porcupine_client.start_recorder()
 
 
 if __name__ == '__main__':
